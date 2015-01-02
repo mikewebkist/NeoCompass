@@ -63,17 +63,17 @@ void loop() {
 
   strip.clear();
 
+  // The north-pointing pixel.
   strip.setPixelColor(pixel, 1 << 7, 0, 0);
   for(int i=0; i<4; i++) {
+    // A bit to the west...
     strip.setPixelColor((pixel + 8 + i) % 12, 1 << (i + 2), 0, 0);
+    // A bit to the east...
     strip.setPixelColor((pixel + (4 - i)) % 12, 1 << (i + 2  ), 0, 0);
-    // strip.setPixelColor((pixel + 8 + i) % 12, 1 << i, 0, 0);
   }
-  // strip.setPixelColor(pixel, red, green, blue);
   strip.show();
   delay(delayval);
 }
-
 
 
 
