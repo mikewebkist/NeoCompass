@@ -29,10 +29,6 @@ void setup() {
 
 }
 
-int red = 0;
-int green = 0;
-int blue = 0;
-int delayval = 0;
 int zval = 0;
 sensors_event_t event; 
 float Pi = 3.14159;
@@ -41,10 +37,6 @@ int pixel;
 
 // the loop routine runs over and over again forever:
 void loop() {
-  green = random(0, 16) * 4;
-  blue = random(0, 16) * 4;
-  red = random(0, 16) * 4;
-  delayval = random(1, 100) * 5;
   mag.getEvent(&event);
 
   heading = (atan2(event.magnetic.y,event.magnetic.x) * 180) / Pi;
@@ -58,11 +50,8 @@ void loop() {
   Serial.print(" [");
   Serial.print(pixel); 
   Serial.println("]");
-  delay(100);
-
 
   strip.clear();
-
   // The north-pointing pixel.
   strip.setPixelColor(pixel, 1 << 7, 0, 0);
   for(int i=0; i<4; i++) {
@@ -72,7 +61,7 @@ void loop() {
     strip.setPixelColor((pixel + (4 - i)) % 12, 1 << (i + 2  ), 0, 0);
   }
   strip.show();
-  delay(delayval);
+  delay(100);
 }
 
 
