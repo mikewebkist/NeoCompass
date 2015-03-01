@@ -8,6 +8,7 @@
 #define PIN 12
 #define PIXEL_SHIFT 40
 uint32_t topColor, bottomColor;
+const float Pi = 3.14159;
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(LEDS, PIN, NEO_GRB + NEO_KHZ800);
 
@@ -44,36 +45,30 @@ void setup() {
 
 }
 
-int zval = 0;
 sensors_event_t event; 
-float Pi = 3.14159;
-float heading;
-float accelMagnitude, magMagnitude;
-float xyval;
-int pixel;
-float xaccel, yaccel, zaccel, zmag, ymag, xmag, zpercent, topLEDs;
 
 // the loop routine runs over and over again forever:
 void loop() {
   accel.getEvent(&event);
   
-  xaccel = event.acceleration.x;
-  yaccel = event.acceleration.y;
-  zaccel = event.acceleration.z;
+  float xaccel = event.acceleration.x;
+  float yaccel = event.acceleration.y;
+  float zaccel = event.acceleration.z;
 
-  accelMagnitude = sqrt(sq(xaccel) + sq(yaccel) + sq(zaccel));
+  float accelMagnitude = sqrt(sq(xaccel) + sq(yaccel) + sq(zaccel));
   
   mag.getEvent(&event);
-  xmag = event.magnetic.x;
-  ymag = event.magnetic.y;
-  zmag = event.magnetic.z;
+  float xmag = event.magnetic.x;
+  float ymag = event.magnetic.y;
+  float zmag = event.magnetic.z;
 
-  magMagnitude = sqrt(sq(xmag) + sq(ymag) + sq(zmag));
+  float magMagnitude = sqrt(sq(xmag) + sq(ymag) + sq(zmag));
   
-  zpercent = (zaccel / accelMagnitude + 1.0) / 2.0;
+  float zpercent = (zaccel / accelMagnitude + 1.0) / 2.0;
   
-  xyval = sqrt(sq(zaccel) + sq(yaccel));
-  heading   = (atan2(xaccel, yaccel) * 180) / Pi;
+  float xyval = sqrt(sq(zaccel) + sq(yaccel));
+  float heading   = (atan2(xaccel, yaccel) * 180) / Pi;
+
 /* */ 
   Serial.print("xaccel: "); Serial.print(xaccel); 
   Serial.print(" yaccel: "); Serial.print(yaccel); 
@@ -85,52 +80,32 @@ void loop() {
   Serial.print(" zmag  : "); Serial.print(zmag); 
   Serial.print(" zmag%  : "); Serial.println(magMagnitude); 
   // 15.28285714	-25.27	-70.72857143
+
   // Normalize to 0-360
   heading   = heading + 360 + PIXEL_SHIFT;
   if(heading >= 360.0) { heading = heading - 360.0; }
-  pixel = ((int) (heading / 30)) % 12;
+  int pixel = ((int) (heading / 30)) % 12;
 
   strip.clear();
+  int max = 255;
+  float step = (max - (max * zpercent)) / LEDS;
 
-  // The north- & south-pointing pixels.
-  strip.setPixelColor(pixel, topColor);
-         if(zpercent < 0.1) {
-    topLEDs = 0;
-  } else if(zpercent < 0.2) {
-    topLEDs = 1;
-  } else if(zpercent < 0.3) {
-    topLEDs = 2;
-  } else if(zpercent < 0.4) {
-    topLEDs = 3;
-  } else if(zpercent < 0.5) {
-    topLEDs = 3;
-  } else if(zpercent < 0.6) {
-    topLEDs = 3;
-  } else if(zpercent < 0.7) {
-    topLEDs = 4;
-  } else if(zpercent < 0.8) {
-    topLEDs = 5;
-  } else if(zpercent < 0.9) {
-    topLEDs = 6;
-  } else {
-    topLEDs = 7;
-  }
-    
-  // topLEDs = (int) (zpercent * 6);
-  for(int i=0; i<topLEDs; i++) {
+  for(int i=0; i<LEDS; i++) {
     // A bit to the west...
-    strip.setPixelColor((pixel + i) % 12, topColor);
+    strip.setPixelColor((pixel + i) % 12, doGamma((int) step * i), 0, 0);
     // A bit to the east...
-    strip.setPixelColor((pixel + 12 - i) % 12, topColor);
+    strip.setPixelColor((pixel + 12 - i) % 12, doGamma((int) step * i), 0, 0);
   }
+  /*
   for(int i=topLEDs; i<7; i++) {
     // A bit to the west...
     strip.setPixelColor((pixel + i) % 12, bottomColor);
     // A bit to the east...
     strip.setPixelColor((pixel + 12 - i) % 12, bottomColor);
   }
+  */
   
   strip.show();
-  delay(100);
+  delay(1000);
 }
 
