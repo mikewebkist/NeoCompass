@@ -18,30 +18,30 @@ Adafruit_LSM303_Mag_Unified mag = Adafruit_LSM303_Mag_Unified(123);
 
 // the setup routine runs once when you press reset:
 void setup() {                
-  // initialize the digital pin as an output.
-  strip.begin();
-  strip.clear();
-  strip.show();  
+    // initialize the digital pin as an output.
+    strip.begin();
+    strip.clear();
+    strip.show();  
 
-  topColor = strip.Color(1 << 3, 0, 0);
-  bottomColor = strip.Color(0, 0, 1 << 3);
+    topColor = strip.Color(1 << 3, 0, 0);
+    bottomColor = strip.Color(0, 0, 1 << 3);
 
-  Serial.begin(9600);
+    Serial.begin(9600);
 
-  if(!accel.begin())
-  {
-    /* There was a problem detecting the compass ... check your connections */
-    Serial.println("Ooops, no LSM303 detected ... Check your wiring!");
-    while(1);
-  }
-  // accel.enableAutoRange(true);
-  if(!mag.begin())
-  {
-    /* There was a problem detecting the compass ... check your connections */
-    Serial.println("Ooops, no LSM303 detected ... Check your wiring!");
-    while(1);
-  }
-  // mag.enableAutoRange(true);
+    if(!accel.begin())
+    {
+	/* There was a problem detecting the compass ... check your connections */
+	Serial.println("Ooops, no LSM303 detected ... Check your wiring!");
+	while(1);
+    }
+    // accel.enableAutoRange(true);
+    if(!mag.begin())
+    {
+	/* There was a problem detecting the compass ... check your connections */
+	Serial.println("Ooops, no LSM303 detected ... Check your wiring!");
+	while(1);
+    }
+    // mag.enableAutoRange(true);
 
 }
 
