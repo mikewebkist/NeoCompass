@@ -12,8 +12,8 @@ uint32_t topColor, bottomColor;
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(LEDS, PIN, NEO_GRB + NEO_KHZ800);
 
 // Compass+Accellerometer
-//Adafruit_LSM303_Accel_Unified sensor = Adafruit_LSM303_Accel_Unified(12345);
-Adafruit_LSM303_Mag_Unified sensor = Adafruit_LSM303_Mag_Unified(12345);
+Adafruit_LSM303_Accel_Unified accel = Adafruit_LSM303_Accel_Unified(456);
+Adafruit_LSM303_Mag_Unified mag = Adafruit_LSM303_Mag_Unified(123);
 
 // the setup routine runs once when you press reset:
 void setup() {                
@@ -27,13 +27,20 @@ void setup() {
 
   Serial.begin(9600);
 
-  if(!sensor.begin())
+  if(!accel.begin())
   {
     /* There was a problem detecting the compass ... check your connections */
     Serial.println("Ooops, no LSM303 detected ... Check your wiring!");
     while(1);
   }
-sensor.enableAutoRange(true);
+  // accel.enableAutoRange(true);
+  if(!mag.begin())
+  {
+    /* There was a problem detecting the compass ... check your connections */
+    Serial.println("Ooops, no LSM303 detected ... Check your wiring!");
+    while(1);
+  }
+  // mag.enableAutoRange(true);
 
 }
 
@@ -41,32 +48,43 @@ int zval = 0;
 sensors_event_t event; 
 float Pi = 3.14159;
 float heading;
-float headingz;
+float accelMagnitude, magMagnitude;
 float xyval;
 int pixel;
-float x, y, z, gmag, zpercent, topLEDs;
+float xaccel, yaccel, zaccel, zmag, ymag, xmag, zpercent, topLEDs;
 
 // the loop routine runs over and over again forever:
 void loop() {
-  sensor.getEvent(&event);
-  x = event.acceleration.x;
-  y = event.acceleration.y;
-  z = event.acceleration.z;
-  //x = event.magnetic.x;
-  //y = event.magnetic.y;
-  //z = event.magnetic.z;
-  gmag = sqrt(sq(x) + sq(y) + sq(z));
-  zpercent = (z / gmag + 1.0) / 2.0;
+  accel.getEvent(&event);
   
-  xyval = sqrt(sq(z) + sq(y));
-  heading   = (atan2(x, y) * 180) / Pi;
-  headingz = (atan2(z, xyval) * 180) / Pi;
-  
-  Serial.print("x: "); Serial.print(x); 
-  Serial.print(" y: "); Serial.print(y); 
-  Serial.print(" z: "); Serial.print(z); 
-  Serial.print(" z%: "); Serial.println(zpercent); 
+  xaccel = event.acceleration.x;
+  yaccel = event.acceleration.y;
+  zaccel = event.acceleration.z;
 
+  accelMagnitude = sqrt(sq(xaccel) + sq(yaccel) + sq(zaccel));
+  
+  mag.getEvent(&event);
+  xmag = event.magnetic.x;
+  ymag = event.magnetic.y;
+  zmag = event.magnetic.z;
+
+  magMagnitude = sqrt(sq(xmag) + sq(ymag) + sq(zmag));
+  
+  zpercent = (zaccel / accelMagnitude + 1.0) / 2.0;
+  
+  xyval = sqrt(sq(zaccel) + sq(yaccel));
+  heading   = (atan2(xaccel, yaccel) * 180) / Pi;
+/* */ 
+  Serial.print("xaccel: "); Serial.print(xaccel); 
+  Serial.print(" yaccel: "); Serial.print(yaccel); 
+  Serial.print(" zaccel: "); Serial.print(zaccel); 
+  Serial.print(" zaccel%: "); Serial.println(accelMagnitude); 
+/**/
+  Serial.print("xmag  : "); Serial.print(xmag); 
+  Serial.print(" ymag  : "); Serial.print(ymag); 
+  Serial.print(" zmag  : "); Serial.print(zmag); 
+  Serial.print(" zmag%  : "); Serial.println(magMagnitude); 
+  // 15.28285714	-25.27	-70.72857143
   // Normalize to 0-360
   heading   = heading + 360 + PIXEL_SHIFT;
   if(heading >= 360.0) { heading = heading - 360.0; }
@@ -76,7 +94,6 @@ void loop() {
 
   // The north- & south-pointing pixels.
   strip.setPixelColor(pixel, topColor);
-  // strip.setPixelColor((pixel + 6) % 12, bottomColor);
          if(zpercent < 0.1) {
     topLEDs = 0;
   } else if(zpercent < 0.2) {
@@ -103,10 +120,8 @@ void loop() {
   for(int i=0; i<topLEDs; i++) {
     // A bit to the west...
     strip.setPixelColor((pixel + i) % 12, topColor);
-    // strip.setPixelColor((pixel + 6 + i) % 12, 0, 0, bottomColor);
     // A bit to the east...
     strip.setPixelColor((pixel + 12 - i) % 12, topColor);
-    // strip.setPixelColor((pixel + 6 - i) % 12, bottomColor);
   }
   for(int i=topLEDs; i<7; i++) {
     // A bit to the west...
