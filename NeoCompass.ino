@@ -17,30 +17,30 @@ Adafruit_LSM303_Mag_Unified mag = Adafruit_LSM303_Mag_Unified(123);
 
 // the setup routine runs once when you press reset:
 void setup() {                
-  // initialize the digital pin as an output.
-  strip.begin();
-  strip.clear();
-  strip.show();  
+    // initialize the digital pin as an output.
+    strip.begin();
+    strip.clear();
+    strip.show();  
 
-  topColor = strip.Color(1 << 3, 0, 0);
-  bottomColor = strip.Color(0, 0, 1 << 3);
+    topColor = strip.Color(1 << 3, 0, 0);
+    bottomColor = strip.Color(0, 0, 1 << 3);
 
-  Serial.begin(9600);
+    Serial.begin(9600);
 
-  if(!accel.begin())
-  {
-    /* There was a problem detecting the compass ... check your connections */
-    Serial.println("Ooops, no LSM303 detected ... Check your wiring!");
-    while(1);
-  }
-  // accel.enableAutoRange(true);
-  if(!mag.begin())
-  {
-    /* There was a problem detecting the compass ... check your connections */
-    Serial.println("Ooops, no LSM303 detected ... Check your wiring!");
-    while(1);
-  }
-  // mag.enableAutoRange(true);
+    if(!accel.begin())
+    {
+	/* There was a problem detecting the compass ... check your connections */
+	Serial.println("Ooops, no LSM303 detected ... Check your wiring!");
+	while(1);
+    }
+    // accel.enableAutoRange(true);
+    if(!mag.begin())
+    {
+	/* There was a problem detecting the compass ... check your connections */
+	Serial.println("Ooops, no LSM303 detected ... Check your wiring!");
+	while(1);
+    }
+    // mag.enableAutoRange(true);
 
 }
 
@@ -55,82 +55,82 @@ float xaccel, yaccel, zaccel, zmag, ymag, xmag, zpercent, topLEDs;
 
 // the loop routine runs over and over again forever:
 void loop() {
-  accel.getEvent(&event);
-  
-  xaccel = event.acceleration.x;
-  yaccel = event.acceleration.y;
-  zaccel = event.acceleration.z;
+    accel.getEvent(&event);
 
-  accelMagnitude = sqrt(sq(xaccel) + sq(yaccel) + sq(zaccel));
-  
-  mag.getEvent(&event);
-  xmag = event.magnetic.x;
-  ymag = event.magnetic.y;
-  zmag = event.magnetic.z;
+    xaccel = event.acceleration.x;
+    yaccel = event.acceleration.y;
+    zaccel = event.acceleration.z;
 
-  magMagnitude = sqrt(sq(xmag) + sq(ymag) + sq(zmag));
-  
-  zpercent = (zaccel / accelMagnitude + 1.0) / 2.0;
-  
-  xyval = sqrt(sq(zaccel) + sq(yaccel));
-  heading   = (atan2(xaccel, yaccel) * 180) / Pi;
-/* */ 
-  Serial.print("xaccel: "); Serial.print(xaccel); 
-  Serial.print(" yaccel: "); Serial.print(yaccel); 
-  Serial.print(" zaccel: "); Serial.print(zaccel); 
-  Serial.print(" zaccel%: "); Serial.println(accelMagnitude); 
-/**/
-  Serial.print("xmag  : "); Serial.print(xmag); 
-  Serial.print(" ymag  : "); Serial.print(ymag); 
-  Serial.print(" zmag  : "); Serial.print(zmag); 
-  Serial.print(" zmag%  : "); Serial.println(magMagnitude); 
-  // 15.28285714	-25.27	-70.72857143
-  // Normalize to 0-360
-  heading   = heading + 360 + PIXEL_SHIFT;
-  if(heading >= 360.0) { heading = heading - 360.0; }
-  pixel = ((int) (heading / 30)) % 12;
+    accelMagnitude = sqrt(sq(xaccel) + sq(yaccel) + sq(zaccel));
 
-  strip.clear();
+    mag.getEvent(&event);
+    xmag = event.magnetic.x;
+    ymag = event.magnetic.y;
+    zmag = event.magnetic.z;
 
-  // The north- & south-pointing pixels.
-  strip.setPixelColor(pixel, topColor);
-         if(zpercent < 0.1) {
-    topLEDs = 0;
-  } else if(zpercent < 0.2) {
-    topLEDs = 1;
-  } else if(zpercent < 0.3) {
-    topLEDs = 2;
-  } else if(zpercent < 0.4) {
-    topLEDs = 3;
-  } else if(zpercent < 0.5) {
-    topLEDs = 3;
-  } else if(zpercent < 0.6) {
-    topLEDs = 3;
-  } else if(zpercent < 0.7) {
-    topLEDs = 4;
-  } else if(zpercent < 0.8) {
-    topLEDs = 5;
-  } else if(zpercent < 0.9) {
-    topLEDs = 6;
-  } else {
-    topLEDs = 7;
-  }
-    
-  // topLEDs = (int) (zpercent * 6);
-  for(int i=0; i<topLEDs; i++) {
-    // A bit to the west...
-    strip.setPixelColor((pixel + i) % 12, topColor);
-    // A bit to the east...
-    strip.setPixelColor((pixel + 12 - i) % 12, topColor);
-  }
-  for(int i=topLEDs; i<7; i++) {
-    // A bit to the west...
-    strip.setPixelColor((pixel + i) % 12, bottomColor);
-    // A bit to the east...
-    strip.setPixelColor((pixel + 12 - i) % 12, bottomColor);
-  }
-  
-  strip.show();
-  delay(100);
+    magMagnitude = sqrt(sq(xmag) + sq(ymag) + sq(zmag));
+
+    zpercent = (zaccel / accelMagnitude + 1.0) / 2.0;
+
+    xyval = sqrt(sq(zaccel) + sq(yaccel));
+    heading   = (atan2(xaccel, yaccel) * 180) / Pi;
+    /* */ 
+    Serial.print("xaccel: "); Serial.print(xaccel); 
+    Serial.print(" yaccel: "); Serial.print(yaccel); 
+    Serial.print(" zaccel: "); Serial.print(zaccel); 
+    Serial.print(" zaccel%: "); Serial.println(accelMagnitude); 
+    /**/
+    Serial.print("xmag  : "); Serial.print(xmag); 
+    Serial.print(" ymag  : "); Serial.print(ymag); 
+    Serial.print(" zmag  : "); Serial.print(zmag); 
+    Serial.print(" zmag%  : "); Serial.println(magMagnitude); 
+    // 15.28285714	-25.27	-70.72857143
+    // Normalize to 0-360
+    heading   = heading + 360 + PIXEL_SHIFT;
+    if(heading >= 360.0) { heading = heading - 360.0; }
+    pixel = ((int) (heading / 30)) % 12;
+
+    strip.clear();
+
+    // The north- & south-pointing pixels.
+    strip.setPixelColor(pixel, topColor);
+    if(zpercent < 0.1) {
+	topLEDs = 0;
+    } else if(zpercent < 0.2) {
+	topLEDs = 1;
+    } else if(zpercent < 0.3) {
+	topLEDs = 2;
+    } else if(zpercent < 0.4) {
+	topLEDs = 3;
+    } else if(zpercent < 0.5) {
+	topLEDs = 3;
+    } else if(zpercent < 0.6) {
+	topLEDs = 3;
+    } else if(zpercent < 0.7) {
+	topLEDs = 4;
+    } else if(zpercent < 0.8) {
+	topLEDs = 5;
+    } else if(zpercent < 0.9) {
+	topLEDs = 6;
+    } else {
+	topLEDs = 7;
+    }
+
+    // topLEDs = (int) (zpercent * 6);
+    for(int i=0; i<topLEDs; i++) {
+	// A bit to the west...
+	strip.setPixelColor((pixel + i) % 12, topColor);
+	// A bit to the east...
+	strip.setPixelColor((pixel + 12 - i) % 12, topColor);
+    }
+    for(int i=topLEDs; i<7; i++) {
+	// A bit to the west...
+	strip.setPixelColor((pixel + i) % 12, bottomColor);
+	// A bit to the east...
+	strip.setPixelColor((pixel + 12 - i) % 12, bottomColor);
+    }
+
+    strip.show();
+    delay(100);
 }
 
