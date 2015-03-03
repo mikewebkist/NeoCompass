@@ -74,20 +74,22 @@ void loop() {
 
     xyval = sqrt(sq(zaccel) + sq(yaccel));
     heading   = (atan2(xaccel, yaccel) * 180) / Pi;
-    /* */ 
-    Serial.print("xaccel: "); Serial.print(xaccel); 
-    Serial.print(" yaccel: "); Serial.print(yaccel); 
-    Serial.print(" zaccel: "); Serial.print(zaccel); 
-    Serial.print(" zaccel%: "); Serial.println(accelMagnitude); 
-    /**/
-    Serial.print("xmag  : "); Serial.print(xmag); 
-    Serial.print(" ymag  : "); Serial.print(ymag); 
-    Serial.print(" zmag  : "); Serial.print(zmag); 
-    Serial.print(" zmag%  : "); Serial.println(magMagnitude); 
-    // 15.28285714	-25.27	-70.72857143
+    Serial.print("accel: ");
+    Serial.print(xaccel); Serial.print(", ");
+    Serial.print(yaccel); Serial.print(", ");
+    Serial.print(zaccel); Serial.print(") %: ");
+    Serial.println(accelMagnitude); 
+
+    // Value when pointing north: 15.28285714, -25.27, -70.72857143
+    Serial.print("mag: ");
+    Serial.print(xmag); Serial.print(", ");
+    Serial.print(ymag); Serial.print(", ");
+    Serial.print(zmag); Serial.print(") %: ");
+    Serial.println(magMagnitude); 
+
     // Normalize to 0-360
     heading   = heading + 360 + PIXEL_SHIFT;
-    if(heading >= 360.0) { heading = heading - 360.0; }
+    if (heading >= 360) { heading = heading - ((int) (heading / 360)) * 360; }
     pixel = ((int) (heading / 30)) % 12;
 
     strip.clear();
