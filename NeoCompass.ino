@@ -103,7 +103,6 @@ void loop() {
 
     if(zperint % 10) {
 	float fraction = (zperint % 10) / 10.0 * 64.0;
-        Serial.println(fraction); 
 	strip.setPixelColor((pixel + zperint / 10) % 12, doGamma((int) fraction), 0, 0);
 	strip.setPixelColor((pixel - zperint / 10) % 12, doGamma((int) fraction), 0, 0);
     }
