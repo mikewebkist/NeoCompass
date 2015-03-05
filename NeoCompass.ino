@@ -71,6 +71,7 @@ void loop() {
     magMagnitude = sqrt(sq(xmag) + sq(ymag) + sq(zmag));
 
     zpercent = (zaccel / accelMagnitude + 1.0) / 2.0;
+    // zpercent = (zmag / magMagnitude + 1.0) / 2.0;
 
     xyval = sqrt(sq(zaccel) + sq(yaccel));
     heading   = (atan2(xaccel, yaccel) * 180) / Pi;
@@ -94,42 +95,17 @@ void loop() {
 
     strip.clear();
 
-    // The north- & south-pointing pixels.
-    strip.setPixelColor(pixel, topColor);
-    if(zpercent < 0.1) {
-	topLEDs = 0;
-    } else if(zpercent < 0.2) {
-	topLEDs = 1;
-    } else if(zpercent < 0.3) {
-	topLEDs = 2;
-    } else if(zpercent < 0.4) {
-	topLEDs = 3;
-    } else if(zpercent < 0.5) {
-	topLEDs = 3;
-    } else if(zpercent < 0.6) {
-	topLEDs = 3;
-    } else if(zpercent < 0.7) {
-	topLEDs = 4;
-    } else if(zpercent < 0.8) {
-	topLEDs = 5;
-    } else if(zpercent < 0.9) {
-	topLEDs = 6;
-    } else {
-	topLEDs = 7;
+    int zperint = (int) (zpercent * 70);
+    for(int i=0; i<(zperint / 10); i++) {
+	strip.setPixelColor((pixel + i) % 12, doGamma(64), 0, 0);
+	strip.setPixelColor((pixel - i) % 12, doGamma(64), 0, 0);
     }
 
-    // topLEDs = (int) (zpercent * 6);
-    for(int i=0; i<topLEDs; i++) {
-	// A bit to the west...
-	strip.setPixelColor((pixel + i) % 12, topColor);
-	// A bit to the east...
-	strip.setPixelColor((pixel + 12 - i) % 12, topColor);
-    }
-    for(int i=topLEDs; i<7; i++) {
-	// A bit to the west...
-	strip.setPixelColor((pixel + i) % 12, bottomColor);
-	// A bit to the east...
-	strip.setPixelColor((pixel + 12 - i) % 12, bottomColor);
+    if(zperint % 10) {
+	float fraction = (zperint % 10) / 10.0 * 64.0;
+        Serial.println(fraction); 
+	strip.setPixelColor((pixel + zperint / 10) % 12, doGamma((int) fraction), 0, 0);
+	strip.setPixelColor((pixel - zperint / 10) % 12, doGamma((int) fraction), 0, 0);
     }
 
     strip.show();
