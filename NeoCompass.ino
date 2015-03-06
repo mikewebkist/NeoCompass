@@ -46,68 +46,75 @@ void setup() {
 
 int zval = 0;
 sensors_event_t event; 
-float Pi = 3.14159;
-float heading;
-float accelMagnitude, magMagnitude;
-float xyval;
-int pixel;
-float xaccel, yaccel, zaccel, zmag, ymag, xmag, zpercent, topLEDs;
+const float Pi = 3.14159;
 
 // the loop routine runs over and over again forever:
 void loop() {
     accel.getEvent(&event);
 
-    xaccel = event.acceleration.x;
-    yaccel = event.acceleration.y;
-    zaccel = event.acceleration.z;
+    float xaccel = event.acceleration.x;
+    float yaccel = event.acceleration.y;
+    float zaccel = event.acceleration.z;
 
-    accelMagnitude = sqrt(sq(xaccel) + sq(yaccel) + sq(zaccel));
+    float accelMagnitude = sqrt(sq(xaccel) + sq(yaccel) + sq(zaccel));
+
+    // Mag Minimums: -69.45  -69.27  -83.57
+    // Mag Maximums:  65.55   39.36   25.61
+
+    // Mag Minimums: -56.27  -71.00  -83.27
+    // Mag Maximums: 64.27  43.64  47.76
+
 
     mag.getEvent(&event);
-    xmag = event.magnetic.x;
-    ymag = event.magnetic.y;
-    zmag = event.magnetic.z;
+    float xmag = (event.magnetic.x + 70) / (70 + 70);
+    float ymag = (event.magnetic.y + 70) / (70 + 40);
+    float zmag = (event.magnetic.z + 85) / (85 + 30);
 
-    magMagnitude = sqrt(sq(xmag) + sq(ymag) + sq(zmag));
+    float magMagnitude = sqrt(sq(xmag) + sq(ymag) + sq(zmag));
 
-    zpercent = (zaccel / accelMagnitude + 1.0) / 2.0;
-    // zpercent = (zmag / magMagnitude + 1.0) / 2.0;
+    // zpercent = (zaccel / accelMagnitude + 1.0) / 2.0;
+    float zpercent = (zmag / magMagnitude + 1.0) / 2.0;
 
-    xyval = sqrt(sq(zaccel) + sq(yaccel));
-    heading   = (atan2(xaccel, yaccel) * 180) / Pi;
-    Serial.print("accel: ");
-    Serial.print(xaccel); Serial.print(", ");
-    Serial.print(yaccel); Serial.print(", ");
-    Serial.print(zaccel); Serial.print(") %: ");
-    Serial.println(accelMagnitude); 
+    float xyval = sqrt(sq(zaccel) + sq(yaccel));
+    Serial.print("accel: (");
+    Serial.print((int)xaccel); Serial.print(", ");
+    Serial.print((int)yaccel); Serial.print(", ");
+    Serial.print((int)zaccel); Serial.print(") %: ");
+    Serial.println((int)accelMagnitude); 
 
     // Value when pointing north: 15.28285714, -25.27, -70.72857143
-    Serial.print("mag: ");
+    Serial.print("  mag: (");
     Serial.print(xmag); Serial.print(", ");
     Serial.print(ymag); Serial.print(", ");
     Serial.print(zmag); Serial.print(") %: ");
     Serial.println(magMagnitude); 
 
     // Normalize to 0-360
+    // float heading   = (atan2(xaccel, yaccel) * 180) / Pi;
+    float heading   = (atan2(xmag, ymag) * 180) / Pi;
     heading   = heading + 360 + PIXEL_SHIFT;
     if (heading >= 360) { heading = heading - ((int) (heading / 360)) * 360; }
-    pixel = ((int) (heading / 30)) % 12;
+    int pixel = ((int) (heading / 30)) % 12;
 
     strip.clear();
 
     int zperint = (int) (zpercent * 70);
     for(int i=0; i<(zperint / 10); i++) {
 	strip.setPixelColor((pixel + i) % 12, doGamma(64), 0, 0);
-	strip.setPixelColor((pixel - i) % 12, doGamma(64), 0, 0);
+	strip.setPixelColor((pixel - i + 12) % 12, doGamma(64), 0, 0);
+    }
+
+    for(int i=(zperint / 10); i<7; i++) {
+	strip.setPixelColor((pixel + i) % 12, 0, 0, doGamma(64));
+	strip.setPixelColor((pixel - i + 12) % 12, 0, 0, doGamma(64));
     }
 
     if(zperint % 10) {
 	float fraction = (zperint % 10) / 10.0 * 64.0;
-	strip.setPixelColor((pixel + zperint / 10) % 12, doGamma((int) fraction), 0, 0);
-	strip.setPixelColor((pixel - zperint / 10) % 12, doGamma((int) fraction), 0, 0);
+	strip.setPixelColor((pixel + zperint / 10) % 12, doGamma((int) fraction), 0, doGamma((int) (64.0 - fraction)));
+	strip.setPixelColor((pixel - zperint / 10 + 12) % 12, doGamma((int) fraction), 0, doGamma((int) (64.0 - fraction)));
     }
 
     strip.show();
-    delay(100);
+    delay(300);
 }
-
