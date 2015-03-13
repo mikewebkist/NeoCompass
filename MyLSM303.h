@@ -2,7 +2,9 @@
 
 class MyLSM303 : public LSM303 {
     public:
-	// MyLSM303();
-	float vertical_magnitude();
+	float yaw(void);
+	float pitch(void);
+	float roll(void);
+	template <typename T> float vertical_heading(vector<T> from);
     private:
 };
